@@ -1,7 +1,13 @@
 from __future__ import print_function
-import os, boto3, json, base64
-import urllib.request, urllib.parse
+
+import base64
+import json
 import logging
+import os
+
+import boto3
+import urllib.parse
+import urllib.request
 
 
 # Decrypt encrypted URL with KMS
@@ -36,6 +42,32 @@ def cloudwatch_notification(message, region):
         }
 
 
+def codepipeline_approval_notification(message, region):
+    return {
+        "fallback": "CodePipeline {0}-{1} Approval Requested: {2}".format(message["approval"]["pipelineName"], region,
+                                                                          message["approval"]["consoleLink"]),
+        "fields": [
+            {"title": "Project", "value": message["approval"]["pipelineName"], "short": True},
+            {"title": "Action Name", "value": message["approval"]["actionName"], "short": True},
+            {"title": "Stage Name", "value": message["approval"]["stageName"], "short": True},
+            {"title": "Region", "value": region, "short": True}
+        ],
+        "actions": [
+            {
+                "type": "button",
+                "text": "Approve",
+                "style": "danger",
+                "url": message["approval"]["approvalReviewLink"]
+            },
+            {
+                "type": "button",
+                "text": "Pipeline",
+                "url": message["approval"]["consoleLink"]
+            }
+        ]
+    }
+
+
 def default_notification(message):
     return {
             "fallback": "A new message",
@@ -62,6 +94,10 @@ def notify_slack(message, region):
     if "AlarmName" in message:
         notification = cloudwatch_notification(message, region)
         payload['text'] = "AWS CloudWatch notification - " + message["AlarmName"]
+        payload['attachments'].append(notification)
+    elif "approval" in message:
+        notification = codepipeline_approval_notification(message, region)
+        payload['text'] = "AWS CodePipeline Approval - " + message["approval"]["pipelineName"]
         payload['attachments'].append(notification)
     else:
         payload['text'] = "AWS notification"
