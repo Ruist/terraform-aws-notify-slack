@@ -1,11 +1,10 @@
 from __future__ import print_function
 
 import base64
+import boto3
 import json
 import logging
 import os
-
-import boto3
 import urllib.parse
 import urllib.request
 
@@ -62,7 +61,7 @@ def codepipeline_approval_notification(message, region):
             {
                 "type": "button",
                 "text": "Pipeline",
-                "url": message["approval"]["consoleLink"]
+                "url": message["consoleLink"]
             }
         ]
     }
