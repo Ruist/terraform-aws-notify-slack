@@ -1,10 +1,11 @@
 from __future__ import print_function
 
 import base64
-import boto3
 import json
 import logging
 import os
+
+import boto3
 import urllib.parse
 import urllib.request
 
@@ -44,7 +45,7 @@ def cloudwatch_notification(message, region):
 def codepipeline_approval_notification(message, region):
     return {
         "fallback": "CodePipeline {0}-{1} Approval Requested: {2}".format(message["approval"]["pipelineName"], region,
-                                                                          message["approval"]["consoleLink"]),
+                                                                          message["consoleLink"]),
         "fields": [
             {"title": "Project", "value": message["approval"]["pipelineName"], "short": True},
             {"title": "Action Name", "value": message["approval"]["actionName"], "short": True},
