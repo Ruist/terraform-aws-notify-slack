@@ -84,7 +84,7 @@ resource "aws_lambda_function" "notify_slack" {
 }
 
 resource "aws_cloudwatch_log_group" "lambda_logs" {
-  count = "1"
+  count = "${var.create}"
   name = "/aws/lambda/${var.lambda_function_name}"
   retention_in_days = 30
 }
