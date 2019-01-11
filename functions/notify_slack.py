@@ -21,6 +21,16 @@ def decrypt(encrypted_url):
         logging.exception("Failed to decrypt URL with KMS")
 
 
+def ec2_notification(message, region):
+    return {
+        "fallback": "EC2 Instance Terminated in {0}: {1}".format(region, message["detail"]["instance-id"]),
+        "fields": [
+            {"title": "Instance", "value": message["detail"]["instance-id"], "short": True},
+            {"title": "Region", "value": region, "short": True}
+        ]
+    }
+
+
 def cloudwatch_notification(message, region):
     states = {'OK': 'good', 'INSUFFICIENT_DATA': 'warning', 'ALARM': 'danger'}
 
@@ -98,6 +108,10 @@ def notify_slack(message, region):
     elif "approval" in message:
         notification = codepipeline_approval_notification(message, region)
         payload['text'] = "AWS CodePipeline Approval - " + message["approval"]["pipelineName"]
+        payload['attachments'].append(notification)
+    elif "source" in message and message["source"] == "aws.ec2":
+        notification = codepipeline_approval_notification(message, region)
+        payload['text'] = "EC2 Instance Terminated: " + message["detail"]["instance-id"]
         payload['attachments'].append(notification)
     else:
         payload['text'] = "AWS notification"
