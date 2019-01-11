@@ -46,5 +46,5 @@ variable "kms_key_arn" {
 
 variable "environment" {
   description = "Environment of the notification"
-  default = "staging"
+  default = "none"
 }
