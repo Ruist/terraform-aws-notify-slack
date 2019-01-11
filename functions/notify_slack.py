@@ -110,7 +110,7 @@ def notify_slack(message, region):
         payload['text'] = "AWS CodePipeline Approval - " + message["approval"]["pipelineName"]
         payload['attachments'].append(notification)
     elif "source" in message and message["source"] == "aws.ec2":
-        notification = codepipeline_approval_notification(message, region)
+        notification = ec2_notification(message, region)
         payload['text'] = "EC2 Instance Terminated: " + message["detail"]["instance-id"]
         payload['attachments'].append(notification)
     else:
