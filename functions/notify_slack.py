@@ -21,17 +21,18 @@ def decrypt(encrypted_url):
         logging.exception("Failed to decrypt URL with KMS")
 
 
-def ec2_notification(message, region):
+def ec2_notification(message, region, environment):
     return {
         "fallback": "EC2 Instance Terminated in {0}: {1}".format(region, message["detail"]["instance-id"]),
         "fields": [
             {"title": "Instance", "value": message["detail"]["instance-id"], "short": True},
-            {"title": "Region", "value": region, "short": True}
+            {"title": "Region", "value": region, "short": True},
+            {"title": "Environment", "value": environment, "short": True}
         ]
     }
 
 
-def cloudwatch_notification(message, region):
+def cloudwatch_notification(message, region, environment):
     states = {'OK': 'good', 'INSUFFICIENT_DATA': 'warning', 'ALARM': 'danger'}
 
     return {
@@ -47,7 +48,8 @@ def cloudwatch_notification(message, region):
                     "title": "Link to Alarm",
                     "value": "https://console.aws.amazon.com/cloudwatch/home?region=" + region + "#alarm:alarmFilter=ANY;name=" + urllib.parse.quote_plus(message['AlarmName']),
                     "short": False
-                }
+                },
+                {"title": "Environment", "value": environment, "short": True},
             ]
         }
 
@@ -94,6 +96,7 @@ def notify_slack(message, region):
     slack_channel = os.environ['SLACK_CHANNEL']
     slack_username = os.environ['SLACK_USERNAME']
     slack_emoji = os.environ['SLACK_EMOJI']
+    environment = os.environ['ENVIRONMENT']
 
     payload = {
         "channel": slack_channel,
@@ -102,7 +105,7 @@ def notify_slack(message, region):
         "attachments": []
     }
     if "AlarmName" in message:
-        notification = cloudwatch_notification(message, region)
+        notification = cloudwatch_notification(message, region, environment)
         payload['text'] = "AWS CloudWatch notification - " + message["AlarmName"]
         payload['attachments'].append(notification)
     elif "approval" in message:
@@ -110,7 +113,7 @@ def notify_slack(message, region):
         payload['text'] = "AWS CodePipeline Approval - " + message["approval"]["pipelineName"]
         payload['attachments'].append(notification)
     elif "source" in message and message["source"] == "aws.ec2":
-        notification = ec2_notification(message, region)
+        notification = ec2_notification(message, region, environment)
         payload['text'] = "EC2 Instance Terminated: " + message["detail"]["instance-id"]
         payload['attachments'].append(notification)
     else:
