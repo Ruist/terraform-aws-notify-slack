@@ -1,29 +1,22 @@
 data "aws_sns_topic" "this" {
-  count = 1 - var.create_sns_topic * var.create
+  count = 1 - var.create_sns_topic * (var.create == true ? 1 : 0)
 
   name = var.sns_topic_name
 }
 
 resource "aws_sns_topic" "this" {
-  count = var.create_sns_topic * var.create
+  count = var.create_sns_topic * (var.create == true ? 1 : 0)
 
   name = var.sns_topic_name
 }
 
 locals {
-  sns_topic_arn = element(
-  concat(
-  aws_sns_topic.this.*.arn,
-  data.aws_sns_topic.this.*.arn,
-  [
-    ""],
-  ),
-  0,
-  )
+  sns_topic_arn = element(concat(aws_sns_topic.this.*.arn, data.aws_sns_topic.this.*.arn, [
+    ""]), 0)
 }
 
 resource "aws_sns_topic_subscription" "sns_notify_slack" {
-  count = var.create
+  count = (var.create == true ? 1 : 0)
 
   topic_arn = local.sns_topic_arn
   protocol = "lambda"
@@ -31,7 +24,7 @@ resource "aws_sns_topic_subscription" "sns_notify_slack" {
 }
 
 resource "aws_lambda_permission" "sns_notify_slack" {
-  count = var.create
+  count = (var.create == true ? 1 : 0)
 
   statement_id = "AllowExecutionFromSNS"
   action = "lambda:InvokeFunction"
@@ -61,7 +54,7 @@ data "null_data_source" "lambda_archive" {
 }
 
 data "archive_file" "notify_slack" {
-  count = var.create
+  count = (var.create == true ? 1 : 0)
 
   type = "zip"
   source_file = data.null_data_source.lambda_file.outputs.filename
@@ -69,7 +62,7 @@ data "archive_file" "notify_slack" {
 }
 
 resource "aws_lambda_function" "notify_slack" {
-  count = var.create
+  count = (var.create == true ? 1 : 0)
 
   filename = data.archive_file.notify_slack[0].output_path
 
@@ -101,7 +94,7 @@ resource "aws_lambda_function" "notify_slack" {
 }
 
 resource "aws_cloudwatch_log_group" "lambda_logs" {
-  count = var.create
+  count = (var.create == true ? 1 : 0)
   name = "/aws/lambda/${var.lambda_function_name}"
   retention_in_days = 30
 }
