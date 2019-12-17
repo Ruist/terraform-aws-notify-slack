@@ -1,21 +1,21 @@
 variable "create" {
   description = "Whether to create all resources"
-  default     = true
+  default = true
 }
 
 variable "create_sns_topic" {
   description = "Whether to create new SNS topic"
-  default     = true
+  default = true
 }
 
 variable "create_with_kms_key" {
   description = "Whether to create resources with KMS encryption"
-  default     = false
+  default = false
 }
 
 variable "lambda_function_name" {
   description = "The name of the Lambda function to create"
-  default     = "notify_slack"
+  default = "notify_slack"
 }
 
 variable "sns_topic_name" {
@@ -36,12 +36,12 @@ variable "slack_username" {
 
 variable "slack_emoji" {
   description = "A custom emoji that will appear on Slack messages"
-  default     = ":aws:"
+  default = ":aws:"
 }
 
 variable "kms_key_arn" {
   description = "ARN of the KMS key used for decrypting slack webhook url"
-  default     = ""
+  default = ""
 }
 
 variable "environment" {
