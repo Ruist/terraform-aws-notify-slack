@@ -1,5 +1,5 @@
 data "aws_sns_topic" "this" {
-  count = 1 - (var.create_sns_topic == true ? 1 : 0) * (var.create == true ? 1 : 0)
+  count = (1 - (var.create_sns_topic == true ? 1 : 0)) * (var.create == true ? 1 : 0)
 
   name = var.sns_topic_name
 }
