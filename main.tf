@@ -45,7 +45,7 @@ data "archive_file" "notify_slack" {
 
   type = "zip"
   source_file = "${path.module}/functions/notify_slack.py"
-  output_path = "${path.module}/functions/notify_slack.${random_id.id.dec}.zip"
+  output_path = "${path.module}/functions/notify_slack-${random_id.id.dec}.zip"
 }
 
 resource "aws_lambda_function" "notify_slack" {
