@@ -33,19 +33,24 @@ resource "aws_lambda_permission" "sns_notify_slack" {
   source_arn = local.sns_topic_arn
 }
 
-resource "random_id" "id" {
-  keepers = {
-    timestamp = timestamp()
+data "null_data_source" "lambda_file" {
+  inputs = {
+    filename = "${path.module}/functions/notify_slack.py"
   }
-  byte_length = 8
+}
+
+data "null_data_source" "lambda_archive" {
+  inputs = {
+    filename = "${path.module}/functions/notify_slack.zip"
+  }
 }
 
 data "archive_file" "notify_slack" {
   count = (var.create == true ? 1 : 0)
 
   type = "zip"
-  source_file = "${path.module}/functions/notify_slack.py"
-  output_path = "${path.module}/functions/notify_slack.${random_id.id.dec}.zip"
+  source_file = data.null_data_source.lambda_file.outputs.filename
+  output_path = data.null_data_source.lambda_archive.outputs.filename
 }
 
 resource "aws_lambda_function" "notify_slack" {
@@ -57,8 +62,8 @@ resource "aws_lambda_function" "notify_slack" {
 
   role = aws_iam_role.lambda[0].arn
   handler = "notify_slack.lambda_handler"
-  source_code_hash = random_id.id.dec
-  runtime = "python3.6"
+  source_code_hash = data.archive_file.notify_slack[0].output_base64sha256
+  runtime = "python3.7"
   timeout = 30
   kms_key_arn = var.kms_key_arn
 
