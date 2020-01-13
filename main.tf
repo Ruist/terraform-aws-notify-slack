@@ -49,6 +49,9 @@ data "archive_file" "notify_slack" {
 }
 
 resource "aws_lambda_function" "notify_slack" {
+  depends_on = [
+    data.archive_file.notify_slack]
+
   count = (var.create == true ? 1 : 0)
 
   filename = "${path.module}/functions/notify_slack.${random_id.id.dec}.zip"
@@ -57,7 +60,6 @@ resource "aws_lambda_function" "notify_slack" {
 
   role = aws_iam_role.lambda[0].arn
   handler = "notify_slack.lambda_handler"
-  source_code_hash = data.archive_file.notify_slack[0].output_base64sha256
   runtime = "python3.6"
   timeout = 30
   kms_key_arn = var.kms_key_arn
