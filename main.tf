@@ -45,13 +45,13 @@ data "archive_file" "notify_slack" {
 
   type = "zip"
   source_file = "${path.module}/functions/notify_slack.py"
-  output_path = "${path.module}/functions/notify_slack-${random_id.id.dec}.zip"
+  output_path = "${path.module}/functions/notify_slack.${random_id.id.dec}.zip"
 }
 
 resource "aws_lambda_function" "notify_slack" {
   count = (var.create == true ? 1 : 0)
 
-  filename = data.archive_file.notify_slack[0].output_path
+  filename = "${path.module}/functions/notify_slack.${random_id.id.dec}.zip"
 
   function_name = var.lambda_function_name
 
