@@ -34,7 +34,7 @@ resource "aws_lambda_permission" "sns_notify_slack" {
 }
 
 resource "random_id" "id" {
-  keepers {
+  keepers = {
     timestamp = timestamp()
   }
   byte_length = 8
