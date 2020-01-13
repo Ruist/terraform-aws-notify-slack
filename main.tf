@@ -33,12 +33,19 @@ resource "aws_lambda_permission" "sns_notify_slack" {
   source_arn = local.sns_topic_arn
 }
 
+resource "random_id" "id" {
+  keepers {
+    timestamp = timestamp()
+  }
+  byte_length = 8
+}
+
 data "archive_file" "notify_slack" {
   count = (var.create == true ? 1 : 0)
 
   type = "zip"
   source_file = "${path.module}/functions/notify_slack.py"
-  output_path = "${path.module}/functions/notify_slack.zip"
+  output_path = "${path.module}/functions/notify_slack.${random_id.id.dec}.zip"
 }
 
 resource "aws_lambda_function" "notify_slack" {
