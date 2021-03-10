@@ -97,7 +97,8 @@ module "lambda" {
     ENVIRONMENT       = var.environment
   }
 
-  lambda_role               = aws_iam_role.lambda[0].arn
+  create_role               = var.lambda_role == ""  
+  lambda_role               = var.lambda_role
   role_name                 = "${var.iam_role_name_prefix}-${var.lambda_function_name}"
   role_permissions_boundary = var.iam_role_boundary_policy_arn
   role_tags                 = var.iam_role_tags
