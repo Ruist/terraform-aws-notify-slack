@@ -43,7 +43,7 @@ variable "subscription_filter_policy" {
 variable "iam_role_name_prefix" {
   description = "A unique role name beginning with the specified prefix"
   type        = string
-  default     = "lambda"
+  default     = "notify-slack-"
 }
 
 variable "lambda_function_name" {
